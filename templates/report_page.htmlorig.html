@@ -201,8 +201,8 @@
     hovermode:'closest',
     annotations : [],
     xaxis :{showline: true,
-            ticktext : {{NCV_stat['NCV_'+chrom]['X_labels']|tojson}},
-            tickvals : {{NCV_stat['NCV_'+chrom]['x_axis']}},
+            ticktext : {{case_data['NCV_'+chrom]['X_labels']|tojson}},
+            tickvals : {{case_data['NCV_'+chrom]['x_axis']}},
             tickangle : 20,
             linecolor: '#636363',
             linewidth: 5,
@@ -221,7 +221,7 @@
 
     {% for line  in tris_thresholds %} 
         layout["annotations"].push({
-            x: {{NCV_stat['NCV_'+chrom]['x_range'][-1]}},
+            x: {{case_data['NCV_'+chrom]['x_range'][-1]}},
             y: {{tris_thresholds[line]['NCV']}},
             xref: 'x',
             yref: 'y',
@@ -235,7 +235,7 @@
             family: 'Courier New, monospace',
             size: 15
              }})
-        var line = {x : {{NCV_stat['NCV_'+chrom]['x_range']}},
+        var line = {x : {{case_data['NCV_'+chrom]['x_range']}},
             y : [{{tris_thresholds[line]['NCV']}},{{tris_thresholds[line]['NCV']}}],
             mode: 'lines',
             showlegend: false,
@@ -264,10 +264,10 @@
 
 
     var trace1 = {
-    name: "Current batch (N={{NCV_stat['NCV_'+chrom]['nr_cases']}})",
-      y: {{NCV_stat['NCV_'+chrom]['NCV_cases']}},
-      x: {{NCV_stat['NCV_'+chrom]['x_axis']}},
-      text: {{NCV_stat['NCV_'+chrom]['X_labels']|tojson}},
+    name: "Current batch (N={{case_data['NCV_'+chrom]['nr_cases']}})",
+      y: {{case_data['NCV_'+chrom]['NCV_cases']}},
+      x: {{case_data['NCV_'+chrom]['x_axis']}},
+      text: {{case_data['NCV_'+chrom]['X_labels']|tojson}},
       mode: 'markers',
       type: 'scatter',
     marker: {
@@ -275,12 +275,12 @@
             size: {{case_size}}
             }};
     var box = {
-    y: {{NCV_stat['NCV_'+chrom]['NCV_pass'][0]}},
+    y: {{case_data['NCV_'+chrom]['NCV_pass'][0]}},
     pointpos: 30,
     type: 'box',
     marker: {
         color: '#ccccb3'},
-        name: 'Negative (N={{NCV_stat['NCV_'+chrom]['nr_pass']}})',
+        name: 'Negative (N={{case_data['NCV_'+chrom]['nr_pass']}})',
         hoverinfo:'none'};
 
     data.push(trace1)
@@ -315,10 +315,10 @@
             title : 'NCVY'
             },};
     var backstat = {
-    y: {{NCV_stat['NCV_Y']['NCV_pass'][0]}},
-    x: {{NCV_stat['NCV_X']['NCV_pass'][0]}},
-    text: {{NCV_stat['NCV_X']['NCV_pass_names'][0]|tojson}},
-    name: 'Negative (N={{NCV_stat['NCV_X']['nr_pass']}})',
+    y: {{case_data['NCV_Y']['NCV_pass'][0]}},
+    x: {{case_data['NCV_X']['NCV_pass'][0]}},
+    text: {{case_data['NCV_X']['NCV_pass_names'][0]|tojson}},
+    name: 'Negative (N={{case_data['NCV_X']['nr_pass']}})',
     hoverinfo:'none',
     mode: 'markers',
     type: 'scatter',
@@ -378,11 +378,11 @@
     {% endfor %}
     {% for i in samp_range %}
     var trace1 = {
-    y: [{{NCV_stat['NCV_Y']['NCV_cases'][i]}}],
-    x: [{{NCV_stat['NCV_X']['NCV_cases'][i]}}],
-    name: {{NCV_stat['NCV_X']['X_labels'][i]|tojson}},
+    y: [{{case_data['NCV_Y']['NCV_cases'][i]}}],
+    x: [{{case_data['NCV_X']['NCV_cases'][i]}}],
+    name: {{case_data['NCV_X']['X_labels'][i]|tojson}},
     mode: 'markers',
-    text: {{NCV_stat['NCV_X']['X_labels'][i]|tojson}},
+    text: {{case_data['NCV_X']['X_labels'][i]|tojson}},
     type: 'scatter',
     marker: {
             color: '{{many_colors[i]}}',

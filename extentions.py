@@ -11,8 +11,11 @@ from werkzeug.contrib.fixers import ProxyFix
 
 
 
-app = Flask(__name__)
-app.config.from_pyfile('../../config/config.py')
+app = Flask('PNIPT')
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_pyfile('config.py')
+
+#app.config.from_pyfile('../../config/config.py')
 app.wsgi_app = ProxyFix(app.wsgi_app)
 
 mail = Mail(app)

@@ -1,0 +1,207 @@
+{% extends 'invoices/layout.html' %}
+
+
+
+{% block body %}
+        <div class="container-fluid">
+            <div class="jumbotron vertical-center">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">Batch: {{batch_name}}</h1>
+                        <h1><small><em> Sequenced {{seq_date}}</em></small></h1>
+                        <p align="right">
+                        <a href={{ url_for('report', batch_id=batch_id) }}> Batch Report</a>
+                        </p>
+                    </div>
+                </div>
+                {% if seq_warnings %}
+                <div class="row">
+                    <div id = "custom-tag"> </div>
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5>Batch Warnings </h5>
+                            </div>
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                            <th>Sample id</th>
+                                            <th><a href="#" data-toggle="tooltip" data-placement="bottom" title="Warning if NonExcludedSites < 8000000.">Missing data</a></th>
+                                            <th>QC Warning</th>
+                                            <th>QC Failure</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for s in seq_warnings %}
+                                            <tr>
+                                            <td> <a href={{ url_for('sample_page', sample_id=s) }}>{{ s }}</a></td>
+                                            <td>{{seq_warnings[s]['missing_data'] }}</td>
+                                            <td>{{ seq_warnings[s]['QC_warn'] }}</td>
+                                            <td>{{ seq_warnings[s]['QC_fail'] }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div> <!--jumbotron-->
+            <ul class="nav nav-tabs" id="myTab">
+                                <li><a href="{{url_for('sample', batch_id = batch_id)}}">NCV Table</a>
+                                </li>
+                                <li class="active"><a href="{{url_for('NCV13_plot', batch_id = batch_id)}}" >NCV13</a>
+                                </li>
+                                <li><a href="{{url_for('NCV18_plot', batch_id = batch_id)}}">NCV18</a>
+                                </li>
+                                <li><a href="{{url_for('NCV21_plot', batch_id = batch_id)}}">NCV21</a>
+                                </li>
+                                <li><a href="{{url_for('NCVXY_plot', batch_id = batch_id)}}">NCVXY</a>
+                                </li>
+                                {% if bool_warns %}
+                                <li><a href="{{url_for('coverage_plot', batch_id = batch_id)}}">Coverage (Chr 1-22)</a>
+                                </li>
+                                {% endif %}
+            </ul>
+            <div class="tab-pane active" id='NCV_13'>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="NCV131821NCV_13" style="min-width:400px; height:800px; "></div><br><br>
+                    </div>
+                </div>
+            </div>
+        </div> <!--container-->
+{% endblock %}
+ 
+
+{% block scripts %}
+<script>
+    $(function () {
+    {% for chrom in ['13'] %}
+    var data = []
+    var layout = {
+        legend:{hovermode:'closest' },
+        hovermode:'closest',
+        annotations : [],
+        xaxis :{showline: true,
+                ticktext : {{NCV_stat['NCV_'+chrom]['X_labels']|tojson}},
+                tickvals : {{NCV_stat['NCV_'+chrom]['x_axis']}},
+                tickangle : 20,
+                linecolor: '#636363',
+                linewidth: 5,
+                showgrid: true,
+                gridcolor: '#bdbdbd'
+                },
+            
+        yaxis :{range: [-10,],
+                zeroline: false,
+                showline: true,
+                showgrid: false,
+                linecolor: '#636363',
+                linewidth: 5,
+                title : 'NCV{{chrom}}'
+                }};
+
+    {% for line  in tris_thresholds %}
+        layout["annotations"].push({
+            x: {{NCV_stat['NCV_'+chrom]['x_range'][-1]}},
+            y: {{tris_thresholds[line]['NCV']}},
+            xref: 'x',
+            yref: 'y',
+            text: "{{tris_thresholds[line]['text']}}",
+            showarrow: false,
+            xanchor:'left',
+            ax: 20,
+            ay: -30,
+            font: {
+            color:"{{tris_thresholds[line]["color"]}}",
+            family: 'Courier New, monospace',
+            size: 15
+             }})
+        var line = {x : {{NCV_stat['NCV_'+chrom]['x_range']}},
+            y : [{{tris_thresholds[line]['NCV']}},{{tris_thresholds[line]['NCV']}}],
+            mode: 'lines',
+            showlegend: false,
+            line: {
+                dash  : "dot",
+                color : "{{tris_thresholds[line]["color"]}}",
+                width : 2},
+                name  : "{{line}}"};
+        data.push(line);
+    {% endfor %}
+
+    {% for abn_status  in abn_status_list %}
+        var verif = {                                                                  
+            name: "{{abn_status}} T{{chrom}} (N={{tris_chrom_abn[chrom][abn_status]['nr']}})",
+            y: {{tris_chrom_abn[chrom][abn_status]['NCV']}},                                        
+            x: {{tris_chrom_abn[chrom][abn_status]['x_axis']}} ,
+            text: {{tris_chrom_abn[chrom][abn_status]['s_name']|tojson}},                                       
+            mode: 'markers',
+            marker: {symbol :"square",
+                     color: "{{ncv_abn_colors[abn_status]}}", 
+                     size: {{abn_size}}},                                                   
+            type: 'scatter'}; 
+        data.push(verif);
+    {% endfor %}
+
+
+    var trace1 = {
+    name: "Current batch (N={{NCV_stat['NCV_'+chrom]['nr_cases']}})",
+      y: {{NCV_stat['NCV_'+chrom]['NCV_cases']}},
+      x: {{NCV_stat['NCV_'+chrom]['x_axis']}},
+      text: {{NCV_stat['NCV_'+chrom]['X_labels']|tojson}},
+      mode: 'markers',
+      type: 'scatter',
+    marker: {
+            color: 'rgb(102, 102, 102)',
+            size: {{case_size}}
+            }};
+    var box = {
+    y: {{NCV_stat['NCV_'+chrom]['NCV_pass'][0]}},
+    pointpos: 30,
+    type: 'box',
+    marker: {
+        color: '#ccccb3'},
+        name: 'Negative (N={{NCV_stat['NCV_'+chrom]['nr_pass']}})',
+        hoverinfo:'none'};
+
+    data.push(trace1)
+    data.push(box)
+    Plotly.newPlot({{'NCV131821NCV_'+chrom}}, data, layout);
+    {% endfor %}    
+    });
+</script>
+
+<script>
+    $(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();   
+    });
+</script>
+
+<script>
+    jQuery(function () {
+    jQuery('#myTab a:first').tab('show')
+    })
+</script>
+
+<script>
+    $(document).ready(function() {
+    var table = $('#batch_table').DataTable( {
+        lengthChange: false,
+        buttons:    [ 'excel', 'pdf' ],
+        paging:     false,
+        info: false,
+        searching:  false
+    } );
+    table.buttons().container()
+        .appendTo( '#batch_table_wrapper .col-sm-6:eq(0)' );
+} );
+</script>
+{% endblock %}
+
+
+
