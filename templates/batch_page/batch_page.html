@@ -5,33 +5,33 @@
 {% block body %}
 {% include 'layout/navigation.html' %}
 <div class="container-fluid">
-{% include 'batch_page/batch_header.html' %}
-            <ul class="nav nav-tabs" id="myTab">
-                                <li class="active"><a href="{{url_for('sample', batch_id = batch_id)}}">NCV Table</a>
-                                </li>
-                                <li><a href="{{url_for('NCV13_plot', batch_id = batch_id)}}" >NCV13</a>
-                                </li>
-                                <li><a href="{{url_for('NCV18_plot', batch_id = batch_id)}}">NCV18</a>
-                                </li>
-                                <li><a href="{{url_for('NCV21_plot', batch_id = batch_id)}}">NCV21</a>
-                                </li>
-                                <li><a href="{{url_for('NCVXY_plot', batch_id = batch_id)}}">NCVXY</a>
-                                </li>
-                                {% if bool_warns %}
-                                <li><a href="{{url_for('coverage_plot', batch_id = batch_id)}}">Coverage (Chr 1-22)</a>
-                                </li>
-                                {% endif %}
-            </ul>
-            <div class="tab-content">
-            <div class="tab-pane fade in active" id='table'>
-                <div class="col-lg-16">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="table-responsive">
-                                <form action="{{ url_for('update') }}" method="post">
-                                    <table id="batch_table" class="table table-bordered table-hover" >
-                                        <thead>
-                                            <tr>
+    {% include 'batch_page/batch_header.html' %}
+    <ul class="nav nav-tabs" id="myTab">
+        <li class="active"><a href="{{url_for('sample', batch_id = batch_id)}}">NCV Table</a>
+        </li>
+        <li><a href="{{url_for('NCV13_plot', batch_id = batch_id)}}" >NCV13</a>
+        </li>
+        <li><a href="{{url_for('NCV18_plot', batch_id = batch_id)}}">NCV18</a>
+        </li>
+        <li><a href="{{url_for('NCV21_plot', batch_id = batch_id)}}">NCV21</a>
+        </li>
+        <li><a href="{{url_for('NCVXY_plot', batch_id = batch_id)}}">NCVXY</a>
+        </li>
+        {% if bool_warns %}
+        <li><a href="{{url_for('coverage_plot', batch_id = batch_id)}}">Coverage (Chr 1-22)</a>
+        </li>
+        {% endif %}
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane fade in active" id='table'>
+            <div class="col-lg-16">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <form action="{{ url_for('update') }}" method="post">
+                                <table id="batch_table" class="table table-bordered table-hover" >
+                                    <thead>
+                                        <tr>
                                             <th>Sample Name</th>
                                             <th>NCV13</th>
                                             <th>NCV18</th>
@@ -45,9 +45,9 @@
                                             <th>Include</th>
                                             <th>Comment</th>
                                             <th>Last Change</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                         {% for s in NCV_samples %}
                                         <tr>
                                             <td width="20%"> <a href={{ url_for('sample_page', sample_id=s.sample_ID) }}>{{ s.sample_name }}</a></td>
@@ -69,30 +69,30 @@
                                             <td ><small>{{s.change_include_date}}</small></td>
                                         </tr>
                                         {% endfor %}
-                                        </tbody>
-                                    </table>
-                                    <table>
-                                        <tbody>
-                                            <tr>
-                                                    <p align="right">
-                                                    <input type="submit" class="btn btn-warning" value="Save checked samples">
-                                                    <button type="submit" class="btn btn-warning" name="All samples" value="{{sample_ids}}"> Set all OK</button>
-                                                    </p>
-                                            </tr>
-                                            <tr>
-                                                    <p>Samples checked in the 'Include' column are added to the validation sample set for comparison. Check the checkboxes for samples to include and save. If all samples are ok, just press 'set all OK'.</p>
-                                                <input type=text name="sample_ids" value="{{sample_ids}}" hidden>
-                                                <input type=text name="current_user" value="{{current_user.name}}" hidden>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </form>
-                            </div>
+                                    </tbody>
+                                </table>
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <p align="right">
+                                                <input type="submit" class="btn btn-warning" value="Save checked samples">
+                                                <button type="submit" class="btn btn-warning" name="All samples" value="{{sample_ids}}"> Set all OK</button>
+                                            </p>
+                                        </tr>
+                                        <tr>
+                                            <p>Samples checked in the 'Include' column are added to the validation sample set for comparison. Check the checkboxes for samples to include and save. If all samples are ok, just press 'set all OK'.</p>
+                                            <input type=text name="sample_ids" value="{{sample_ids}}" hidden>
+                                            <input type=text name="current_user" value="{{current_user.name}}" hidden>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
-        </div> <!--container-->
+        </div>
+    </div> <!--container-->
 </div>
-        {% endblock %}
+{% endblock %}
 

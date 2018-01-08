@@ -139,7 +139,6 @@ def samples():
 @app.route('/NIPT/')
 @login_required
 def batch():
-    print('lslsl')
     sample_db = Sample.query
     return render_template('start_page.html', 
         batches = Batch.query)
@@ -236,7 +235,6 @@ def update_trisomi_status(batch_id, sample_id):
 @app.route('/NIPT/batches/<batch_id>/')
 @login_required
 def sample(batch_id):
-    print('lala')
     NCV_db = NCV.query.filter(NCV.batch_id == batch_id)
     sample_db = Sample.query.filter(Sample.batch_id == batch_id)
     batch = Batch.query.filter(Batch.batch_id == batch_id).first()
@@ -297,26 +295,20 @@ def sample_page( sample_id):
 @app.route('/NIPT/samples/<sample_id>/sex_plot')
 @login_required
 def sample_xy_plot( sample_id):
-    t0= time.clock()
     sample = Sample.query.filter_by(sample_ID = sample_id).first()
     NCV_dat = NCV.query.filter_by(sample_ID = sample_id)
-    t1= time.clock()
 
     batch_id = sample.batch_id
     batch = Batch.query.filter_by(batch_id = batch_id).first()
-    t2= time.clock()
 
     DC = DataClasifyer(NCV_dat)
     DC.handle_NCV()
-    t3= time.clock()
 
     DC.make_sex_tresholds(BDF.NCV_passed_X)
     chrom_abnorm = ['T13','T18', 'T21', 'X0', 'XXX','XXY','XYY']
-    t4= time.clock()
 
     db_entries = {c:sample.__dict__['status_'+c].replace('\r\n', '').strip() for c in chrom_abnorm }
     db_entries_change = {c:sample.__dict__['status_change_'+c]  for c in chrom_abnorm}
-    t5= time.clock()
 
     # Getting and formating sample and NCV data for the control samples in the plot
     control_normal_X, control_normal_Y, control_normal_XY_names = BDF.control_NCVXY()
@@ -324,13 +316,6 @@ def sample_xy_plot( sample_id):
     PP.make_case_data_new('NCV_X', control_normal_X)
     PP.make_case_data_new('NCV_Y', control_normal_Y)
     PP.make_sex_chrom_abn()
-    t6= time.clock()
-    print t1-t0
-    print t2-t1
-    print t3-t2
-    print t4-t3
-    print t5-t4
-    print t6-t5
     return render_template('sample_page/sample_xy_plot.html',
         ## Header & Info Box
         NCV_dat         = NCV_dat.first(),

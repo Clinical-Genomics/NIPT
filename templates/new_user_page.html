@@ -2,45 +2,45 @@
 
 {% block body %}
 {% include 'layout/navigation.html' %}
-    <div class="jumbotron vertical-center">
-        <div class="container">
-            <div class="row"><br></br>
-            </div>
-            <div class="pull-center">
-                <div class="col-lg-10">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="col-lg-5">
-                                <h1 class="page-header"><strong>Apply here:</strong></h1>
-                                <p>Fill in the email adress and name of the user that should have access to the NIPT viewer. A conformation mail will be sent to you and to the new user.</p>
-                            </div>
-                            <div class="col-lg-5 pull-right" ><br></br>
-
-                                <form action="{{ url_for('message')}}"  method="post">
-                                    <div class="form-group">
-                                        <label for="email">Email address:</label>
-                                        <input type="text" class="form-control" name="email">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="name">Name:</label>
-                                        <input type="text" class="form-control" name="name">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="message">Message:</label>
-                                        <textarea class="form-control" rows="4" name="message"></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-warning">Submit</button>
-                                </form>
-
-
-                           
-                            </div>
+<div class="jumbotron vertical-center">
+    <div class="container">
+        <div class="row"><br></br>
+        </div>
+        <div class="pull-center">
+            <div class="col-lg-10">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-lg-5">
+                            <h1 class="page-header"><strong>Apply here:</strong></h1>
+                            <p>Fill in the email adress and name of the user that should have access to the NIPT viewer. A conformation mail will be sent to you and to the new user.</p>
+                        </div>
+                        <div class="col-lg-5 pull-right" ><br></br>
+                            
+                            <form action="{{ url_for('message')}}"  method="post">
+                                <div class="form-group">
+                                    <label for="email">Email address:</label>
+                                    <input type="text" class="form-control" name="email">
+                                </div>
+                                <div class="form-group">
+                                    <label for="name">Name:</label>
+                                    <input type="text" class="form-control" name="name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="message">Message:</label>
+                                    <textarea class="form-control" rows="4" name="message"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-warning">Submit</button>
+                            </form>
+                            
+                            
+                            
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 {% endblock %}
 
