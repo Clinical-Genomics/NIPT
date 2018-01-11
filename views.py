@@ -408,7 +408,7 @@ def NCV13_plot(batch_id):
     PP.make_case_data_new('NCV_13', control_normal)
     PP.make_tris_chrom_abn(control_abnormal, '13')
     
-    return render_template('batch_page/tab_NCV13.html',
+    return render_template('batch_page/tabs/tab_NCV13.html',
         ##  Header
         batch_name      = batch.batch_name,
         seq_date        = batch.date,
@@ -450,7 +450,7 @@ def NCV18_plot(batch_id):
     PP.make_case_data_new('NCV_18', control_normal)
     PP.make_tris_chrom_abn(control_abnormal, '18')
 
-    return render_template('batch_page/tab_NCV18.html',
+    return render_template('batch_page/tabs/tab_NCV18.html',
         ##  Header
         batch_name      = batch.batch_name,
         seq_date        = batch.date,
@@ -492,7 +492,7 @@ def NCV21_plot(batch_id):
     PP.make_case_data_new('NCV_21', control_normal)
     PP.make_tris_chrom_abn(control_abnormal, '21')
 
-    return render_template('batch_page/tab_NCV21.html',
+    return render_template('batch_page/tabs/tab_NCV21.html',
         ##  Header
         batch_name      = batch.batch_name,
         seq_date        = batch.date,
@@ -535,7 +535,7 @@ def NCVXY_plot(batch_id):
     PP.make_case_data_new('NCV_Y', control_normal_Y)
     PP.make_sex_chrom_abn()
     PP.make_cov_plot_data()
-    return render_template('batch_page/tab_NCVXY.html',
+    return render_template('batch_page/tabs/tab_NCVXY.html',
         ##  Header
         batch_name      = batch.batch_name,
         seq_date        = batch.date,
@@ -577,7 +577,7 @@ def coverage_plot(batch_id):
     DC.get_QC_warnings(sample_db)
     PP = PlottPage(batch_id, BDF)
     PP.make_cov_plot_data()
-    return render_template('batch_page/tab_coverage.html',
+    return render_template('batch_page/tabs/tab_coverage.html',
         ##  Header
         batch_name      = batch.batch_name,
         seq_date        = batch.date,
