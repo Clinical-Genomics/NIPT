@@ -305,7 +305,7 @@ class PlottPage():
         self.batch_id = batch_id
         self.cases = cases
         self.case_data = {'NCV_13':{}, 'NCV_18':{}, 'NCV_21':{}, 'NCV_X':{}, 'NCV_Y' : {}}
-        self.abn_status_X = {'Probable':0.02,'Verified':0.04,'False Positive':0.06,'False Negative':0.08, 'Suspected':0.1, 'Other': 0.12}
+        self.abn_status_X = {'Probable':0,'Verified':0.1,'False Positive':0.2,'False Negative':0.3, 'Suspected':0.4, 'Other': 0.5}
         self.sex_chrom_abn = {'X0':{}, 'XXX':{}, 'XXY':{},'XYY':{}}
         self.tris_chrom_abn = {'13':{}, '18':{}, '21':{}}
         self.tris_abn = {} # This anoying dict is only for the sample_tris_plot, to make possible for one legend per abnormality
@@ -313,8 +313,9 @@ class PlottPage():
             self.tris_abn[status] = {'NCV' : [], 's_name' : [], 'x_axis': []}
         self.coverage_plot = {'samples':[],'x_axis':[]}
         self.case_size = 10
-        self.abn_size = 5
-        self.ncv_abn_colors  = {"Suspected"    :   '#ffd750',
+        self.abn_size = 7
+        self.abn_symbol = 'circle-open'
+        self.ncv_abn_colors  = {"Suspected"    :   '#DBA901',
                                      'Probable'     :   "#0000FF",
                                      'False Negative':  "#ff6699",
                                      'Verified'     :   "#00CC00",
@@ -364,7 +365,8 @@ class PlottPage():
     def _build_tris_abn_dicts(self):
         for abn in self.tris_chrom_abn:
             for status in self.abn_status_X.keys():
-                self.tris_chrom_abn[abn][status] = {'NCV' : [], 's_name' : [], 'x_axis': [], 'nr': 0}
+                if not status in self.tris_chrom_abn[abn]:
+                    self.tris_chrom_abn[abn][status] = {'NCV' : [], 's_name' : [], 'x_axis': [], 'nr': 0}
 
     def make_tris_chrom_abn(self, abnorm_samples, abn):
         """Preparing trisomi control samples"""
@@ -377,7 +379,7 @@ class PlottPage():
             if NCV_val!= 'NA':
                 self.tris_abn[status]['NCV'].append(float(NCV_val))
                 self.tris_abn[status]['s_name'].append(sample_name)
-                self.tris_abn[status]['x_axis'].append(base_x[abn] + self.abn_status_X[status])
+                self.tris_abn[status]['x_axis'].append(base_x[abn] + self.abn_status_X[status] - 0.25)
                 self.tris_chrom_abn[abn][status]['NCV'].append(float(NCV_val))
                 self.tris_chrom_abn[abn][status]['s_name'].append(sample_name)
                 self.tris_chrom_abn[abn][status]['x_axis'].append(self.abn_status_X[status]-0.2)

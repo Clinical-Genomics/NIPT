@@ -332,6 +332,7 @@ def sample_xy_plot( sample_id):
         sex_chrom_abn   = PP.sex_chrom_abn,
         case_size       = PP.case_size,
         abn_size        = PP.abn_size,
+        abn_symbol      = PP.abn_symbol,
         abn_status_list = ['Other','False Positive','Suspected', 'Probable', 'Verified'],
         ncv_abn_colors  = PP.ncv_abn_colors,
         case_data        = PP.case_data,
@@ -381,6 +382,7 @@ def sample_tris_plot( sample_id):
         tris_abn        = PP.tris_abn,
         case_size       = PP.case_size,
         abn_size        = PP.abn_size,
+        abn_symbol      = PP.abn_symbol,
         abn_status_list = ['Other','False Positive','Suspected', 'Probable', 'Verified'],
         ncv_abn_colors  = PP.ncv_abn_colors,
         case_data        = PP.case_data,
@@ -417,6 +419,7 @@ def NCV13_plot(batch_id):
         case_data        = PP.case_data['NCV_13'],
         case_size       = PP.case_size,
         abn_size        = PP.abn_size,
+        abn_symbol      = PP.abn_symbol,
         tris_chrom_abn  = PP.tris_chrom_abn['13'],
         abn_status_list = ['Other','False Positive','Suspected', 'Probable', 'Verified'],
         ncv_abn_colors  = PP.ncv_abn_colors,
@@ -458,6 +461,7 @@ def NCV18_plot(batch_id):
         case_data        = PP.case_data['NCV_18'],
         case_size       = PP.case_size,
         abn_size        = PP.abn_size,
+        abn_symbol      = PP.abn_symbol,
         tris_chrom_abn  = PP.tris_chrom_abn['18'],
         abn_status_list = ['Other','False Positive','Suspected', 'Probable', 'Verified'],
         ncv_abn_colors  = PP.ncv_abn_colors,
@@ -499,6 +503,7 @@ def NCV21_plot(batch_id):
         case_data        = PP.case_data['NCV_21'],
         case_size       = PP.case_size,
         abn_size        = PP.abn_size,
+        abn_symbol      = PP.abn_symbol,
         tris_chrom_abn  = PP.tris_chrom_abn['21'],
         abn_status_list = ['Other','False Positive','Suspected', 'Probable', 'Verified'],
         ncv_abn_colors  = PP.ncv_abn_colors,
@@ -541,6 +546,7 @@ def NCVXY_plot(batch_id):
         case_data        = PP.case_data,
         case_size       = PP.case_size,
         abn_size        = PP.abn_size,
+        abn_symbol      = PP.abn_symbol,
         samp_range      = range(len(PP.case_data['NCV_X']['NCV_cases'])),
         sex_chrom_abn   = PP.sex_chrom_abn,
         abn_status_list = ['Other','False Positive','Suspected', 'Probable', 'Verified'],
@@ -586,7 +592,7 @@ def coverage_plot(batch_id):
         sample_ids      = ','.join(sample.sample_ID for sample in NCV_db))
 
 
-
+import json
 @app.route('/NIPT/batches/<batch_id>/report')
 @login_required
 def report(batch_id):
@@ -603,6 +609,7 @@ def report(batch_id):
     PP.make_case_data_new('NCV_X', control_normal_X)
     PP.make_case_data_new('NCV_Y', control_normal_Y)
     PP.make_sex_chrom_abn()
+
     control_normal, control_abnormal = BDF.control_NCV13()
     PP.make_case_data_new('NCV_13', control_normal)
     PP.make_tris_chrom_abn(control_abnormal, '13')
@@ -612,6 +619,7 @@ def report(batch_id):
     control_normal, control_abnormal = BDF.control_NCV21()
     PP.make_case_data_new('NCV_21', control_normal)
     PP.make_tris_chrom_abn(control_abnormal, '21')
+
     PP.make_cov_plot_data()
     ST = Statistics()
     ST.get_20_latest()
@@ -630,9 +638,10 @@ def report(batch_id):
         batch_names     = ST.batch_names,
         thresholds      = ST.thresholds,
         batch_ids       = ST.batch_ids,
-        case_data        = PP.case_data,
+        case_data        =PP.case_data,
         case_size       = PP.case_size,
         abn_size        = PP.abn_size,
+        abn_symbol      = PP.abn_symbol,
         samp_range      = range(len(PP.case_data['NCV_X']['NCV_cases'])),
         tris_chrom_abn  = PP.tris_chrom_abn,
         sex_chrom_abn   = PP.sex_chrom_abn,

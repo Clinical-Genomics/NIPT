@@ -4,7 +4,6 @@
         var data = []
         var layout = {
         annotations : [],
-        title: 'X vs Y',
         legend:{hovermode:'closest' },
         hovermode:'closest',
         xaxis :{showline: true,
@@ -45,7 +44,7 @@
                 text: {{sex_chrom_abn[abn][abn_status]['s_name']|tojson}},                                       
             mode: 'markers',
             marker: {   size: {{abn_size}},
-                        symbol :"square",
+                        symbol :"{{abn_symbol}}",
                         color: "{{ncv_abn_colors[abn_status]}}"} ,                                                   
                         type: 'scatter'              
                     }; 

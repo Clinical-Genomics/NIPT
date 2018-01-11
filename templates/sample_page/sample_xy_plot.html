@@ -107,7 +107,7 @@
             x: {{sex_chrom_abn[abn][abn_status]['NCV_X']}},
             text: {{sex_chrom_abn[abn][abn_status]['s_name']|tojson}},                                       
             mode: 'markers',
-            marker: {symbol :"square",
+            marker: {symbol :"{{abn_symbol}}",
             size: {{abn_size}},
             color : "{{ncv_abn_colors[abn_status]}}",
         } ,    

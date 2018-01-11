@@ -26,7 +26,6 @@
                 linewidth: 5,
                 title : 'NCV{{chrom}}'
                 }};
-
     {% for line  in tris_thresholds %}
         var line = {x : case_data['x_range'],
             y : [{{tris_thresholds[line]['NCV']}},{{tris_thresholds[line]['NCV']}}],
@@ -39,7 +38,6 @@
                 name  : "{{line}}"};
         data.push(line);
     {% endfor %}
-
     {% for abn_status  in abn_status_list %}
         var verif = {                                                                  
             name: "{{abn_status}} T{{chrom}} (N="+tris_chrom_abn["{{abn_status}}"]['nr']+")",
@@ -47,14 +45,12 @@
             x: tris_chrom_abn["{{abn_status}}"]['x_axis'] ,
             text: tris_chrom_abn["{{abn_status}}"]['s_name'],                                       
             mode: 'markers',
-            marker: {symbol :"square",
+            marker: {symbol :"{{abn_symbol}}",
                      color: "{{ncv_abn_colors[abn_status]}}", 
                      size: {{abn_size}}},                                                   
             type: 'scatter'}; 
         data.push(verif);
     {% endfor %}
-
-
     var trace1 = {
     name: "Current batch (N ="+ case_data['nr_cases']+")",
       y: case_data['NCV_cases'],
@@ -74,12 +70,28 @@
         color: '#ccccb3'},
         name: 'Negative (N='+case_data['nr_pass']+')',
         hoverinfo:'none'};
-
     data.push(trace1)
     data.push(box)
     Plotly.newPlot('NCV_plot', data, layout);
     });
 </script>
 
+
+<script>
+$(document).ready(function() {
+    var table = $('#batch_table').DataTable( {
+        lengthChange: false,
+        paging:     false,
+        info: false,
+        searching:  false
+    } );
+} );
+</script>
+
+
+<script>
+var d = new Date();
+document.getElementById("demo").innerHTML = d.toDateString();
+</script>
 
 {% endblock %}
