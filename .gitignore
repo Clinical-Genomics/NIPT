@@ -13,6 +13,7 @@ instance/
 build/
 dist/
 README
+run_app.py
 
 # ignore log
 NIPT_log
