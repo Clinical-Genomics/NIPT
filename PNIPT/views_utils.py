@@ -490,14 +490,20 @@ class FetalFraction():
 
     def format_case_dict(self):
         for samp in self.dbSample:
-            self.samples[samp.sample_ID] = {}
-            self.samples[samp.sample_ID]['FF'] = int(samp.FF_Formatted.rstrip('%'))
+            try:
+                self.samples[samp.sample_ID] = {}
+                self.samples[samp.sample_ID]['FF'] = int(samp.FF_Formatted.rstrip('%'))
+            except:
+                pass
         for samp in self.dbNCV:
             if not samp.sample_ID in self.samples:
                self.samples[samp.sample_ID] = {} 
-            self.samples[samp.sample_ID]['name'] = samp.sample_name
-            self.samples[samp.sample_ID]['NCVY'] = float(samp.NCV_Y)
-            self.samples[samp.sample_ID]['NCVX'] = float(samp.NCV_X)
+            try:
+                self.samples[samp.sample_ID]['name'] = samp.sample_name
+                self.samples[samp.sample_ID]['NCVY'] = float(samp.NCV_Y)
+                self.samples[samp.sample_ID]['NCVX'] = float(samp.NCV_X)
+            except:
+                pass
         self.sample_list = self.samples.keys()
         self.sample_list.sort()
 
@@ -539,9 +545,12 @@ class CovXCovY():
     def format_case_dict(self):
         dbCoverage = Coverage.query.filter(Coverage.batch_id == self.batch_id).all()
         for samp in dbCoverage:
-            self.samples[samp.sample_ID] = {'CovY' : float(samp.ChrY_Coverage),
-                                            'CovX' : float(samp.ChrX_Coverage),
-                                            'name' : samp.sample.sample_name}
+            try:
+                self.samples[samp.sample_ID] = {'CovY' : float(samp.ChrY_Coverage),
+                                                'CovX' : float(samp.ChrX_Coverage),
+                                                'name' : samp.sample.sample_name}
+            except:
+                pass
         self.sample_list = self.samples.keys()
         self.sample_list.sort()
 
