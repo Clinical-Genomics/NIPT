@@ -118,13 +118,11 @@ class BatchDataFilter():
                 NCV.NCV_X!='NA',
                 NCV.NCV_Y!='NA')
 
-
 class DataClasifyer():
     """Contains a bunch of functions for classifying samples in different ways."""
     def __init__(self, NCV_db=None):
         self.NCV_db = NCV_db
         self.NCV_data = {} 
-        self.exceptions = ['NA','']
         self.NCV_classified = {}
         self.NCV_sex = {}
         self.sample_names = {}
@@ -136,7 +134,8 @@ class DataClasifyer():
         self.man_class_merged = {}
         self.sex_tresholds   = {}
         self.ncvy = 20
-        self.tris_thresholds = {'soft_max': {'NCV': 3 , 'color': 'orange', 'text' : 'Warning threshold = 3'},
+        self.tris_thresholds = {'soft_max_ff': {'NCV': 2.5 , 'color': 'orange', 'text' : 'Warning threshold = 2.5'},
+                                'soft_max': {'NCV': 3 , 'color': 'orange', 'text' : 'Warning threshold = 3'},
                                 'soft_min': {'NCV': -4, 'color': 'orange', 'text' : 'Warning threshold = -4'},
                                 'hard_max': {'NCV': 4 , 'color': 'red', 'text' : 'Threshold = 4'},
                                 'hard_min': {'NCV': -5, 'color': 'red', 'text' : 'Threshold = -5'} }
@@ -190,96 +189,19 @@ class DataClasifyer():
     def handle_NCV(self): ############ takes time
         """Get automated warnings, based on preset NCV thresholds"""
         for s in self.NCV_db:
-            self.sample_names[s.sample_ID] = s.sample_name
             s_id = s.sample_ID
+            self.sample_names[s_id] = s.sample_name
             self.NCV_comment[s_id] = s.comment
             self.NCV_included[s_id] = s.include
             self.batch[s_id] = {'id':s.batch_id ,'name':s.batch.batch_name}
-            samp_warn = []
-            self.NCV_data[s_id] = {}
-            samp_warn = self._get_tris_warn(s, samp_warn)
-            samp_warn = self._get_sex_warn(s, samp_warn)
-            samp_warn = self._get_FF_warning(s, samp_warn)
-            self.NCV_classified[s.sample_ID] = ', '.join(samp_warn)
-            
-    def _get_FF_warning(self, s, samp_warn):
-        self.NCV_data[s.sample_ID]['FF_Formatted'] = {}
-        try:
-            FetalFraction = float(s.sample.FF_Formatted.rstrip('%').lstrip('<'))
-        except:
-            FetalFraction = None
-        if FetalFraction:
-            self.NCV_data[s.sample_ID]['FF_Formatted']['val'] = FetalFraction
-            if FetalFraction < 2:
-                samp_warn.append('FF')
-                self.NCV_data[s.sample_ID]['FF_Formatted']['warn'] = "danger"
-            else:
-                self.NCV_data[s.sample_ID]['FF_Formatted']['warn'] = "default"
-        return samp_warn
+            SC = SampleClassifyer(s, self.tris_thresholds)
+            SC._get_FF_warning()
+            SC._get_tris_warn()
+            SC._get_sex_warn()
+            self.NCV_classified[s_id] = ', '.join(SC.NCV_classified)
+            self.NCV_data[s_id] = SC.NCV_data
+            self.NCV_sex[s_id] = SC.NCV_sex
 
-    def _get_sex_warn(self,s, samp_warn):
-        """Get automated sex warnings, based on preset NCV thresholds"""
-        sex_warn = ''
-        if not set([s.NCV_X , s.NCV_Y]).issubset(self.exceptions):
-            x = float(s.NCV_X)
-            y = float(s.NCV_Y)
-            f_h = -15.409*x + 91.417 - y
-            f_l = -15.256*x - 62.309 - y
-            if 0>=f_h and x<=-4:
-                sex_warn = 'XYY'
-            elif 0>=f_h and x>=-4 and y>self.ncvy:
-                sex_warn = 'XXY'
-            elif y<self.ncvy and x>=4:
-                sex_warn = 'XXX'
-            elif f_l<0<=f_h and y>self.ncvy:
-                sex_warn = 'XY'
-            elif f_l>0 and x< -4:
-                sex_warn = 'X0'
-            elif -4<=x<=4 and y<self.ncvy:
-                sex_warn = 'XX'
-            
-            if sex_warn in ['XX','XY']:
-                self.NCV_data[s.sample_ID]['NCV_Y']['warn'] = "default"
-                self.NCV_data[s.sample_ID]['NCV_X']['warn'] = "default"
-                sex = sex_warn
-            elif sex_warn:
-                self.NCV_data[s.sample_ID]['NCV_Y']['warn'] = "danger"
-                self.NCV_data[s.sample_ID]['NCV_X']['warn'] = "danger"
-                samp_warn.append(sex_warn)
-                sex = 'ambiguous'
-            else:
-                self.NCV_data[s.sample_ID]['NCV_Y']['warn'] = "default"
-                self.NCV_data[s.sample_ID]['NCV_X']['warn'] = "default"
-                sex = 'ambiguous'
-            self.NCV_sex[s.sample_ID] = sex
-            if 20<=y<50:
-                samp_warn.append(' Compare NCVY with ff!')
-                self.NCV_data[s.sample_ID]['NCV_Y']['warn'] = "danger"        
-        return samp_warn
-  
-    def _get_tris_warn(self, s, samp_warn):
-        """Get automated trisomi warnings, based on preset NCV thresholds"""
-        for key in ['13','18','21','X','Y']:
-            if s.__dict__['NCV_'+key] in self.exceptions:
-                val = s.__dict__['NCV_'+key]
-                warn = "default"
-            else:
-                val = round(float(s.__dict__['NCV_'+key]),2)
-                if  key in ['13','18','21']:
-                    hmin = self.tris_thresholds['hard_min']['NCV']
-                    hmax = self.tris_thresholds['hard_max']['NCV']
-                    smin = self.tris_thresholds['soft_min']['NCV']
-                    smax = self.tris_thresholds['soft_max']['NCV']
-                    if (smax <= val < hmax) or (hmin < val <= smin):
-                        warn = "warning"
-                        samp_warn.append('T'+key)
-                    elif (val >= hmax) or (val <= hmin):
-                        warn = "danger"
-                        samp_warn.append('T'+key)
-                    else:
-                        warn = "default"
-            self.NCV_data[s.sample_ID]['NCV_'+key] = {'val': val, 'warn': warn }
-        return samp_warn
 
     def get_QC_warnings(self, samples):  ####### takes Time --
         for sample in samples:
@@ -294,6 +216,101 @@ class DataClasifyer():
             if sample.QCWarning:
                 self.QC_warnings[sample.sample_ID]['QC_warn'] = sample.QCWarning
 
+
+class SampleClassifyer():
+    def __init__(self, sample, tris_thresholds):
+        self.sample = sample
+        self.NCV_data = {}
+        self.NCV_classified = []
+        self.NCV_sex = ''
+        self.exceptions = ['NA','']
+        self.fetal_fraction = None
+        self.ncvy = 20
+        self.ff_low_upper_warning = None
+        self.tris_thresholds = tris_thresholds
+        self.ff_treshold = 3
+
+    def _get_FF_warning(self):
+        self.NCV_data['FF_Formatted'] = {}
+        try:
+            self.fetal_fraction = float(self.sample.sample.FF_Formatted.rstrip('%').lstrip('<'))
+        except:
+            self.fetal_fraction = None
+        if self.fetal_fraction:
+            self.NCV_data['FF_Formatted']['val'] = self.fetal_fraction
+            if self.fetal_fraction <= self.ff_treshold:
+                self.NCV_classified.append('low FF')
+                self.NCV_data['FF_Formatted']['warn'] = "danger"
+            else:
+                self.NCV_data['FF_Formatted']['warn'] = "default"
+
+    def _get_sex_warn(self):
+        """Get automated sex warnings, based on preset NCV thresholds"""
+        sex_warn = ''
+        if not set([self.sample.NCV_X , self.sample.NCV_Y]).issubset(self.exceptions):
+            x = float(self.sample.NCV_X)
+            y = float(self.sample.NCV_Y)
+            f_h = -15.409 * x + 91.417 - y
+            f_l = -15.256 * x - 62.309 - y
+            if 0 >= f_h and x <=- 4:
+                sex_warn = 'XYY'
+            elif 0 >= f_h and x >=- 4 and y > self.ncvy:
+                sex_warn = 'XXY'
+            elif y < self.ncvy and x >= 4:
+                sex_warn = 'XXX'
+            elif f_l < 0 <= f_h and y > self.ncvy:
+                sex_warn = 'XY'
+            elif f_l > 0 and x < -4:
+                sex_warn = 'X0'
+            elif -4 <= x <= 4 and y < self.ncvy:
+                sex_warn = 'XX'
+            
+            if sex_warn in ['XX','XY']:
+                self.NCV_data['NCV_Y']['warn'] = "default"
+                self.NCV_data['NCV_X']['warn'] = "default"
+                sex = sex_warn
+            elif sex_warn:
+                self.NCV_data['NCV_Y']['warn'] = "danger"
+                self.NCV_data['NCV_X']['warn'] = "danger"
+                self.NCV_classified.append(sex_warn)
+                sex = 'ambiguous'
+            else:
+                self.NCV_data['NCV_Y']['warn'] = "default"
+                self.NCV_data['NCV_X']['warn'] = "default"
+                sex = 'ambiguous'
+            self.NCV_sex = sex
+            if 20<=y<50:
+                self.NCV_classified.append(' Compare NCVY with ff!')
+                self.NCV_data['NCV_Y']['warn'] = "danger"        
+  
+
+
+    def _get_tris_warn(self):
+        """Get automated trisomi warnings, based on preset NCV thresholds"""
+        for key in ['13','18','21','X','Y']:
+            if self.sample.__dict__['NCV_'+key] in self.exceptions:
+                val = self.sample.__dict__['NCV_'+key]
+                warn = "default"
+            else:
+                val = round(float(self.sample.__dict__['NCV_'+key]),2)
+                if  key in ['13','18','21']:
+                    if self.fetal_fraction <= 5:
+                        smax = self.tris_thresholds['soft_max_ff']['NCV']
+                    else:
+                        smax = self.tris_thresholds['soft_max']['NCV']
+                    hmin = self.tris_thresholds['hard_min']['NCV']
+                    hmax = self.tris_thresholds['hard_max']['NCV']
+                    smin = self.tris_thresholds['soft_min']['NCV']
+                    
+                    if (smax <= val < hmax) or (hmin < val <= smin):
+                        warn = "warning"
+                        self.NCV_classified.append('T'+key)
+                    elif (val >= hmax) or (val <= hmin):
+                        warn = "danger"
+                        self.NCV_classified.append('T'+key)
+                    else:
+                        warn = "default"
+            self.NCV_data['NCV_'+key] = {'val': val, 'warn': warn }
 
 ###########################################PLOTS#####################################################
 class Layout():
