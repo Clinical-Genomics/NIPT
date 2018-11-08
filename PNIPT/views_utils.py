@@ -112,6 +112,11 @@ class BatchDataFilter():
     def _fliter_NA(self):
         """Filtering out NA. Could probably be done in a more preyyt way :/"""
         return NCV.query.filter(
+                NCV.NCV_13!='',
+                NCV.NCV_18!='',
+                NCV.NCV_21!='',
+                NCV.NCV_X!='',
+                NCV.NCV_Y!='',
                 NCV.NCV_13!='NA',
                 NCV.NCV_18!='NA',
                 NCV.NCV_21!='NA',
