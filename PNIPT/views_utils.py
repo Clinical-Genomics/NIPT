@@ -483,8 +483,8 @@ class TrisAbnormality():
 class FetalFraction():
     """Class to prepare Fetal Fraction Plot"""
     def __init__(self,batch_id):
-        self.dbNCV = NCV.query.filter(NCV.batch_id == batch_id, NCV.NCV_Y!='NA',NCV.NCV_X!='NA').all()
-        self.dbSample = Sample.query.filter(Sample.batch_id == batch_id, Sample.FF_Formatted!='NA').all()
+        self.dbNCV = NCV.query.filter(NCV.batch_id == batch_id, NCV.NCV_Y!='NA',NCV.NCV_X!='NA', NCV.NCV_Y!='',NCV.NCV_X!='').all()
+        self.dbSample = Sample.query.filter(Sample.batch_id == batch_id, Sample.FF_Formatted!='NA', Sample.FF_Formatted!='').all()
         self.samples = {}
         self.sample_list = []
         self.control = {'NCV_X':[],'NCV_Y':[],'FF':[]}
@@ -531,12 +531,14 @@ class FetalFraction():
 
     def format_contol_dict(self):
         FF_normal = Sample.query.filter(Sample.FF_Formatted!=None,
+                                        Sample.FF_Formatted!='',
+                                        Sample.FF_Formatted!='NA',
                                         Sample.status_X0 == "Normal",
                                         Sample.status_XXX == "Normal",
                                         Sample.status_XXY == "Normal",
                                         Sample.status_XYY == "Normal")
         FF_normal=FF_normal.join(NCV).filter(NCV.NCV_X!='NA', NCV.NCV_Y!='NA',NCV.include==True).all()
-        NCV_normal = NCV.query.filter(NCV.NCV_X!='NA', NCV.NCV_Y!='NA',NCV.include==True)
+        NCV_normal = NCV.query.filter(NCV.NCV_X != 'NA',  NCV.NCV_X !='', NCV.NCV_Y != 'NA', NCV.NCV_Y != '' , NCV.include==True)
         NCV_normal=NCV_normal.join(Sample).filter(Sample.FF_Formatted!='NA',
                                         Sample.status_X0 == "Normal",
                                         Sample.status_XXX == "Normal",
@@ -562,7 +564,8 @@ class CovXCovY():
         self.sample_list = []
         self.control = {'CovY':[],'CovX':[]}
         self.nr_contol_samples = None
-        self.coverage_query = Coverage.query.filter(Coverage.ChrX_Coverage != 'NA', Coverage.ChrX_Coverage!='NA')
+        self.coverage_query = Coverage.query.filter(Coverage.ChrX_Coverage != 'NA', Coverage.ChrX_Coverage!='NA', 
+                                                        Coverage.ChrX_Coverage != '', Coverage.ChrX_Coverage!='')
         
     def format_case_dict(self):
         dbCoverage = Coverage.query.filter(Coverage.batch_id == self.batch_id).all()
