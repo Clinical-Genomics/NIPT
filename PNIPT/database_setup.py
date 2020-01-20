@@ -12,7 +12,7 @@ import os
 import sys
 import glob
 from PNIPT import app
-from PNIPT.database import db, Batch, NCV, Coverage, Sample, User ,BatchStat
+from PNIPT.database import db, Batch, NCV, Coverage, Sample, User ,BatchStat, Raw
 
 class BatchMaker():
 
@@ -50,6 +50,8 @@ class BatchMaker():
             for row in reader:
                 sample = Sample.query.filter_by(sample_ID = row['SampleID'], batch_id = batch.batch_id).first()
                 if (not sample) and (row['SampleID'][0] != '#'):
+                    raw = Raw(row, batch)
+                    self.db.session.add(raw)
                     sample = Sample(row, batch)
                     self.db.session.add(sample)
                     cov = Coverage(row, sample, batch)

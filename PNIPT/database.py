@@ -369,3 +369,63 @@ class Batch(db.Model):
         return '<User %r>' % self.batch_id
 
 
+class Raw(db.Model):
+    __table_name__ = 'raw'
+    id = db.Column(db.Integer, primary_key = True)
+    batch_id = db.Column(db.String(255), db.ForeignKey('batch.batch_id'))
+    batch = db.relationship('Batch', backref = db.backref('sample'))
+    sample_ID = db.Column(db.String(255), unique = True)
+    sample_name = db.Column(db.String(255), unique = False)
+    Flowcell = db.Column(db.String(255), unique = False)
+    Description = db.Column(db.String(255), unique = False)
+    IndexID = db.Column(db.String(255), unique = False)
+    Index = db.Column(db.String(255), unique = False)
+    Well = db.Column(db.String(255), unique = False)
+    Library_nM = db.Column(db.String(255), unique = False)
+    QCFlag = db.Column(db.String(255), unique = False)
+    QCFailure = db.Column(db.String(255), unique = False)
+    QCWarning = db.Column(db.String(255), unique = False)
+    Clusters = db.Column(db.String(255), unique = False)
+    TotalReads2Clusters = db.Column(db.String(255), unique = False)
+    MaxMisindexedReads2Clusters = db.Column(db.String(255), unique = False)
+    IndexedReads = db.Column(db.String(255), unique = False)
+    TotalIndexedReads2Clusters = db.Column(db.String(255), unique = False)
+    Tags = db.Column(db.String(255), unique = False)
+    NonExcludedSites = db.Column(db.String(255), unique = False)
+    NonExcludedSites2Tags = db.Column(db.String(255), unique = False)
+    Tags2IndexedReads = db.Column(db.String(255), unique = False)
+    PerfectMatchTags2Tags = db.Column(db.String(255), unique = False)
+    GCBias = db.Column(db.String(255), unique = False)
+    GCR2 = db.Column(db.String(255), unique = False)
+    FF_Formatted = db.Column(db.String(255), unique = False)
+
+    def __init__(self, nipt_dict, batch):
+        self.batch = batch
+        self.sample_ID = nipt_dict['SampleID']+'_'+batch.batch_id
+        self.sample_name = nipt_dict['SampleID']
+        self.Flowcell = nipt_dict['Flowcell']
+        self.Description = nipt_dict['Description']
+        self.SampleProject = nipt_dict['SampleProject']
+        self.IndexID = nipt_dict['IndexID']
+        self.Index = nipt_dict['Index']
+        self.Well = nipt_dict['Well']
+        self.Library_nM = nipt_dict['Library_nM']
+        self.QCFlag = nipt_dict['QCFlag']
+        self.QCFailure = nipt_dict['QCFailure']
+        self.QCWarning = nipt_dict['QCWarning']
+        self.Clusters = nipt_dict['Clusters']
+        self.TotalReads2Clusters = nipt_dict['TotalReads2Clusters']
+        self.MaxMisindexedReads2Clusters = nipt_dict['MaxMisindexedReads2Clusters']
+        self.IndexedReads = nipt_dict['IndexedReads']
+        self.TotalIndexedReads2Clusters = nipt_dict['TotalIndexedReads2Clusters']
+        self.Tags = nipt_dict['Tags']
+        self.NonExcludedSites = nipt_dict['NonExcludedSites']
+        self.NonExcludedSites2Tags = nipt_dict['NonExcludedSites2Tags']
+        self.Tags2IndexedReads = nipt_dict['Tags2IndexedReads']
+        self.PerfectMatchTags2Tags = nipt_dict['PerfectMatchTags2Tags']
+        self.GCBias = nipt_dict['GCBias']
+        self.GCR2 = nipt_dict['GCR2']
+        self.FF_Formatted =  nipt_dict['FF_Formatted']
+
+    def __repr__(self):
+        return '<User %r>' % self.sample_ID
