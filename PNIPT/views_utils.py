@@ -514,7 +514,7 @@ class FetalFraction():
         for samp in self.dbSample:
             try:
                 self.samples[samp.sample_ID] = {}
-                self.samples[samp.sample_ID]['FF'] = int(samp.FF_Formatted.rstrip('%'))
+                self.samples[samp.sample_ID]['FF'] = int(samp.FF_Formatted.rstrip('%').lstrip('<'))
             except:
                 pass
         for samp in self.dbNCV:
@@ -546,7 +546,7 @@ class FetalFraction():
                                         Sample.status_XYY == "Normal").all()
 
         for sample in FF_normal:
-            self.control['FF'].append(int(sample.FF_Formatted.rstrip('%')))
+            self.control['FF'].append(int(sample.FF_Formatted.rstrip('%').lstrip('<')))
 
         for sample in NCV_normal:
             self.control['NCV_X'].append(float(sample.NCV_X))
