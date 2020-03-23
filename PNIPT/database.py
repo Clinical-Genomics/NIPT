@@ -88,6 +88,13 @@ class Sample(db.Model):
     comment_XXY = db.Column(db.String(255), unique = False)
     comment_XYY = db.Column(db.String(255), unique = False)
     FF_Formatted = db.Column(db.String(255), unique = False)
+    FFY	= db.Column(db.String(255), unique = False)
+    FFX	= db.Column(db.String(255), unique = False)
+    DuplicationRate	= db.Column(db.String(255), unique = False)
+    Bin2BinVariance	= db.Column(db.String(255), unique = False)
+    UnfilteredCNVcalls	= db.Column(db.String(255), unique = False)
+    CNVSegment = db.Column(db.String(255), unique = False)
+
 
     def __init__(self, nipt_dict, batch):
         self.batch = batch
@@ -139,6 +146,13 @@ class Sample(db.Model):
         self.comment_XYY = ''
         self.comment_X0 = ''
         self.FF_Formatted =  nipt_dict['FF_Formatted']
+        self.FFY =  nipt_dict['FFY']
+        self.FFX =  nipt_dict['FFX']
+        self.DuplicationRate =  nipt_dict['DuplicationRate']
+        self.Bin2BinVariance =  nipt_dict['Bin2BinVariance']
+        self.UnfilteredCNVcalls	 =  nipt_dict['UnfilteredCNVcalls']
+        self.CNVSegment =  nipt_dict['CNVSegment']
+
 
     def __repr__(self):
         return '<User %r>' % self.sample_ID
@@ -291,11 +305,11 @@ class NCV(db.Model):
         self.batch = batch
         self.sample_name = sample.sample_name
         self.SampleType = nipt_dict['SampleType']
-        self.NCV_13 = nipt_dict['NCV_13']
-        self.NCV_18 = nipt_dict['NCV_18']
-        self.NCV_21 = nipt_dict['NCV_21']
-        self.NCV_X = nipt_dict['NCV_X']
-        self.NCV_Y = nipt_dict['NCV_Y']     
+        self.NCV_13 = nipt_dict['Zscore_13']
+        self.NCV_18 = nipt_dict['Zscore_18']
+        self.NCV_21 = nipt_dict['Zscore_21']
+        self.NCV_X = nipt_dict['Zscore_X']
+        self.NCV_Y = nipt_dict['Zscore_Y']     
         self.Ratio_13 = nipt_dict['Ratio_13']
         self.Ratio_18 = nipt_dict['Ratio_18']
         self.Ratio_21 = nipt_dict['Ratio_21']

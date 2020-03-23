@@ -45,6 +45,7 @@ class BatchMaker():
                 batch.batch_name = self.batch_name
                 self.db.session.add(batch)
                 self.db.session.commit()
+                print('Added Batch')
         if self.nipt_results and self.batch_name:
             reader = csv.DictReader(open(self.nipt_results, 'rb'))
             for row in reader:
@@ -58,6 +59,7 @@ class BatchMaker():
                     self.db.session.add(ncv)
                     batchstat = BatchStat(row, batch)
                     self.db.session.add(batchstat)
+                    print('Added sample')
         else:
             logging.warning("Could not get analysis info from file: %s" % self.nipt_results)
         try:
