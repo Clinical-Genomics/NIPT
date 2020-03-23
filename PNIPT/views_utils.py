@@ -104,7 +104,7 @@ class BatchDataFilter():
         control_normal_XY_names = []
         for s in control_normal:
             control_normal_X.append(float(s.NCV_X))
-            control_normal_Y.append(float(s.NCV_Y))
+            control_normal_Y.append(float(s.FFY))
             control_normal_XY_names.append(s.sample_name)
 
         return control_normal_X, control_normal_Y, control_normal_XY_names 
@@ -116,12 +116,12 @@ class BatchDataFilter():
                 NCV.NCV_18!='',
                 NCV.NCV_21!='',
                 NCV.NCV_X!='',
-                NCV.NCV_Y!='',
+                NCV.FFY!='',
                 NCV.NCV_13!='NA',
                 NCV.NCV_18!='NA',
                 NCV.NCV_21!='NA',
                 NCV.NCV_X!='NA',
-                NCV.NCV_Y!='NA')
+                NCV.FFY!='NA')
 
 class DataClasifyer():
     """Contains a bunch of functions for classifying samples in different ways."""
@@ -252,9 +252,9 @@ class SampleClassifyer():
     def _get_sex_warn(self):
         """Get automated sex warnings, based on preset NCV thresholds"""
         sex_warn = ''
-        if not set([self.sample.NCV_X , self.sample.NCV_Y]).issubset(self.exceptions):
+        if not set([self.sample.NCV_X , self.sample.FFY]).issubset(self.exceptions):
             x = float(self.sample.NCV_X)
-            y = float(self.sample.NCV_Y)
+            y = float(self.sample.FFY)
             f_h = -15.409 * x + 91.417 - y
             f_l = -15.256 * x - 62.309 - y
             if 0 >= f_h and x <=- 4:
@@ -271,22 +271,22 @@ class SampleClassifyer():
                 sex_warn = 'XX'
             
             if sex_warn in ['XX','XY']:
-                self.NCV_data['NCV_Y']['warn'] = "default"
+                self.NCV_data['FFY']['warn'] = "default"
                 self.NCV_data['NCV_X']['warn'] = "default"
                 sex = sex_warn
             elif sex_warn:
-                self.NCV_data['NCV_Y']['warn'] = "danger"
+                self.NCV_data['FFY']['warn'] = "danger"
                 self.NCV_data['NCV_X']['warn'] = "danger"
                 self.NCV_classified.append(sex_warn)
                 sex = 'ambiguous'
             else:
-                self.NCV_data['NCV_Y']['warn'] = "default"
+                self.NCV_data['FFY']['warn'] = "default"
                 self.NCV_data['NCV_X']['warn'] = "default"
                 sex = 'ambiguous'
             self.NCV_sex = sex
             if 20<=y<50:
                 self.NCV_classified.append(' Compare NCVY with ff!')
-                self.NCV_data['NCV_Y']['warn'] = "danger"        
+                self.NCV_data['FFY']['warn'] = "danger"        
   
 
 
@@ -369,7 +369,7 @@ class SexAbnormality():
     def __init__(self, batch_id, cases):
         self.batch_id = batch_id
         self.cases = cases
-        self.case_data = {'NCV_X':{}, 'NCV_Y' : {}}
+        self.case_data = {'NCV_X':{}, 'FFY' : {}}
         self.abn_status_X = {'Probable':0,'Verified':0.1,'False Positive':0.2,'False Negative':0.3, 'Suspected':0.4, 'Other': 0.5}
         self.sex_chrom_abn = {'X0':{}, 'XXX':{}, 'XXY':{},'XYY':{}}
         self.sample_list = []
@@ -403,13 +403,13 @@ class SexAbnormality():
         """Preparing sex abnormality control samples"""
         for abn in self.sex_chrom_abn.keys():
             for status in self.abn_status_X.keys():
-                self.sex_chrom_abn[abn][status] = {'NCV_X' : [], 'NCV_Y' : [], 's_name' : [], 'nr_cases':0}
+                self.sex_chrom_abn[abn][status] = {'NCV_X' : [], 'FFY' : [], 's_name' : [], 'nr_cases':0}
                 cases = Sample.query.filter(Sample.__dict__['status_'+abn] == status)
                 for s in cases:
                     NCV_db = NCV.query.filter_by(sample_ID = s.sample_ID).first()
-                    if NCV_db.include and (NCV_db.NCV_X!='NA') and NCV_db.NCV_Y!='NA':
+                    if NCV_db.include and (NCV_db.NCV_X!='NA') and NCV_db.FFY!='NA':
                         self.sex_chrom_abn[abn][status]['NCV_X'].append(float(NCV_db.NCV_X))
-                        self.sex_chrom_abn[abn][status]['NCV_Y'].append(float(NCV_db.NCV_Y))
+                        self.sex_chrom_abn[abn][status]['FFY'].append(float(NCV_db.FFY))
                         self.sex_chrom_abn[abn][status]['s_name'].append(s.sample_name)
                         self.sex_chrom_abn[abn][status]['nr_cases']+=1
 
@@ -483,24 +483,24 @@ class TrisAbnormality():
 class FetalFraction():
     """Class to prepare Fetal Fraction Plot"""
     def __init__(self,batch_id):
-        self.dbNCV = NCV.query.filter(NCV.batch_id == batch_id, NCV.NCV_Y!='NA',NCV.NCV_X!='NA', NCV.NCV_Y!='',NCV.NCV_X!='').all()
+        self.dbNCV = NCV.query.filter(NCV.batch_id == batch_id, NCV.FFY!='NA',NCV.NCV_X!='NA', NCV.FFY!='',NCV.NCV_X!='').all()
         self.dbSample = Sample.query.filter(Sample.batch_id == batch_id, Sample.FF_Formatted!='NA', Sample.FF_Formatted!='').all()
         self.samples = {}
         self.sample_list = []
-        self.control = {'NCV_X':[],'NCV_Y':[],'FF':[]}
-        self.perdiction = {'NCV_X':{},'NCV_Y':{}}
+        self.control = {'NCV_X':[],'FFY':[],'FF':[]}
+        self.perdiction = {'NCV_X':{},'FFY':{}}
         self.nr_contol_samples = None
 
     def form_prediction_interval(self):
 
         #y=0.0545x + 5.9299
-        self.perdiction['NCV_Y']['max'] = {'x':[0,500],'y':[5.9299,33.1799]}
+        self.perdiction['FFY']['max'] = {'x':[0,500],'y':[5.9299,33.1799]}
 
         #y=0.0545x - 3.3899
-        self.perdiction['NCV_Y']['min'] = {'x':[0,500],'y':[-3.3899,23.8601]}
+        self.perdiction['FFY']['min'] = {'x':[0,500],'y':[-3.3899,23.8601]}
 
-        self.perdiction['NCV_Y']['ff_min'] = {'x':[0, 500],'y':[2, 2]}
-        self.perdiction['NCV_Y']['NCV_Y_min'] = {'x':[20, 20],'y':[0, 35]}
+        self.perdiction['FFY']['ff_min'] = {'x':[0, 500],'y':[2, 2]}
+        self.perdiction['FFY']['FFY_min'] = {'x':[20, 20],'y':[0, 35]}
 
         #y=-0.8074x + 7.861
         self.perdiction['NCV_X']['min'] = {'x':[-30,5],'y':[32.083,3.824]}
@@ -522,7 +522,7 @@ class FetalFraction():
                self.samples[samp.sample_ID] = {} 
             try:
                 self.samples[samp.sample_ID]['name'] = samp.sample_name
-                self.samples[samp.sample_ID]['NCVY'] = float(samp.NCV_Y)
+                self.samples[samp.sample_ID]['NCVY'] = float(samp.FFY)
                 self.samples[samp.sample_ID]['NCVX'] = float(samp.NCV_X)
             except:
                 pass
@@ -537,8 +537,8 @@ class FetalFraction():
                                         Sample.status_XXX == "Normal",
                                         Sample.status_XXY == "Normal",
                                         Sample.status_XYY == "Normal")
-        FF_normal=FF_normal.join(NCV).filter(NCV.NCV_X!='NA', NCV.NCV_Y!='NA',NCV.include==True).all()
-        NCV_normal = NCV.query.filter(NCV.NCV_X != 'NA',  NCV.NCV_X !='', NCV.NCV_Y != 'NA', NCV.NCV_Y != '' , NCV.include==True)
+        FF_normal=FF_normal.join(NCV).filter(NCV.NCV_X!='NA', NCV.FFY!='NA',NCV.include==True).all()
+        NCV_normal = NCV.query.filter(NCV.NCV_X != 'NA',  NCV.NCV_X !='', NCV.FFY != 'NA', NCV.FFY != '' , NCV.include==True)
         NCV_normal=NCV_normal.join(Sample).filter(Sample.FF_Formatted!='NA',
                                         Sample.status_X0 == "Normal",
                                         Sample.status_XXX == "Normal",
@@ -550,7 +550,7 @@ class FetalFraction():
 
         for sample in NCV_normal:
             self.control['NCV_X'].append(float(sample.NCV_X))
-            self.control['NCV_Y'].append(float(sample.NCV_Y))
+            self.control['FFY'].append(float(sample.FFY))
 
         self.nr_contol_samples = len(self.control['FF'])
 

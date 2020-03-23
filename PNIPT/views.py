@@ -362,7 +362,7 @@ def sample_xy_plot( sample_id):
     control_normal_X, control_normal_Y, control_normal_XY_names = BDF.control_NCVXY()
     SA = SexAbnormality(batch_id, NCV_dat)
     SA.make_case_data('NCV_X', control_normal_X)
-    SA.make_case_data('NCV_Y', control_normal_Y)
+    SA.make_case_data('FFY', control_normal_Y)
     SA.make_sex_chrom_abn()
     return render_template('sample_page/sample_xy_plot.html',
         ## Header & Info Box
@@ -578,7 +578,7 @@ def NCVXY_plot(batch_id):
     control_normal_X, control_normal_Y, control_normal_XY_names = BDF.control_NCVXY() 
     SA = SexAbnormality(batch_id, NCV_db)
     SA.make_case_data('NCV_X', control_normal_X)
-    SA.make_case_data('NCV_Y', control_normal_Y)
+    SA.make_case_data('FFY', control_normal_Y)
     SA.make_sex_chrom_abn()
     return render_template('batch_page/tab_NCVXY.html',
         ##  Header
@@ -722,7 +722,7 @@ def report(batch_id, coverage):
     control_normal_X, control_normal_Y, control_normal_XY_names = BDF.control_NCVXY()
     SA = SexAbnormality(batch_id, NCV_db)
     SA.make_case_data('NCV_X', control_normal_X)
-    SA.make_case_data('NCV_Y', control_normal_Y)
+    SA.make_case_data('FFY', control_normal_Y)
     SA.make_sex_chrom_abn()
 
     TA = TrisAbnormality(batch_id, NCV_db)

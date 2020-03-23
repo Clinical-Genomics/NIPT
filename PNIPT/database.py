@@ -47,8 +47,10 @@ class Sample(db.Model):
     sample_name = db.Column(db.String(255), unique = False)
     Flowcell = db.Column(db.String(255), unique = False)
     Description = db.Column(db.String(255), unique = False)
-    IndexID = db.Column(db.String(255), unique = False)
-    Index = db.Column(db.String(255), unique = False)
+    IndexID1 = db.Column(db.String(255), unique = False)
+    IndexID2 = db.Column(db.String(255), unique = False)
+    Index1 = db.Column(db.String(255), unique = False)
+    Index2 = db.Column(db.String(255), unique = False)
     Well = db.Column(db.String(255), unique = False)
     Library_nM = db.Column(db.String(255), unique = False)
     QCFlag = db.Column(db.String(255), unique = False)
@@ -88,8 +90,6 @@ class Sample(db.Model):
     comment_XXY = db.Column(db.String(255), unique = False)
     comment_XYY = db.Column(db.String(255), unique = False)
     FF_Formatted = db.Column(db.String(255), unique = False)
-    FFY	= db.Column(db.String(255), unique = False)
-    FFX	= db.Column(db.String(255), unique = False)
     DuplicationRate	= db.Column(db.String(255), unique = False)
     Bin2BinVariance	= db.Column(db.String(255), unique = False)
     UnfilteredCNVcalls	= db.Column(db.String(255), unique = False)
@@ -97,14 +97,17 @@ class Sample(db.Model):
 
 
     def __init__(self, nipt_dict, batch):
+        print(nipt_dict.keys())
         self.batch = batch
         self.sample_ID = nipt_dict['SampleID']+'_'+batch.batch_id
         self.sample_name = nipt_dict['SampleID']
         self.Flowcell = nipt_dict['Flowcell']
         self.Description = nipt_dict['Description']
         self.SampleProject = nipt_dict['SampleProject']
-        self.IndexID = nipt_dict['IndexID']
-        self.Index = nipt_dict['Index']
+        self.IndexID1 = nipt_dict['IndexID1']
+        self.IndexID2 = nipt_dict['IndexID2']
+        self.Index1 = nipt_dict['Index1']
+        self.Index2 = nipt_dict['Index2']
         self.Well = nipt_dict['Well']
         self.Library_nM = nipt_dict['Library_nM']
         self.QCFlag = nipt_dict['QCFlag']
@@ -146,8 +149,6 @@ class Sample(db.Model):
         self.comment_XYY = ''
         self.comment_X0 = ''
         self.FF_Formatted =  nipt_dict['FF_Formatted']
-        self.FFY =  nipt_dict['FFY']
-        self.FFX =  nipt_dict['FFX']
         self.DuplicationRate =  nipt_dict['DuplicationRate']
         self.Bin2BinVariance =  nipt_dict['Bin2BinVariance']
         self.UnfilteredCNVcalls	 =  nipt_dict['UnfilteredCNVcalls']
@@ -299,6 +300,8 @@ class NCV(db.Model):
     include = db.Column(db.Boolean, unique = False)
     change_include_date = db.Column(db.String(255), unique = False)
     comment = db.Column(db.String(255), unique = False)
+    FFY	= db.Column(db.String(255), unique = False)
+    FFX	= db.Column(db.String(255), unique = False)
 
     def __init__(self, nipt_dict, sample, batch): 
         self.sample = sample
@@ -323,6 +326,8 @@ class NCV(db.Model):
         self.include = False             # set to False by default before handing over!!!
         self.change_include_date = ''
         self.comment = ''
+        self.FFY =  nipt_dict['FFY'].rstrip('%') if nipt_dict['FFY'] else nipt_dict['FFY']
+        self.FFX =  nipt_dict['FFX'].rstrip('%') if nipt_dict['FFX'] else nipt_dict['FFX']
 
     def __repr__(self):
         return '<User %r>' % self.sample_ID
