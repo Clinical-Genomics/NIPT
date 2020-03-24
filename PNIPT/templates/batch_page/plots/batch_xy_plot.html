@@ -6,28 +6,29 @@
         annotations : [],
         legend:{hovermode:'closest' },
         hovermode:'closest',
-        xaxis :{showline: true,
+        xaxis :{range: [1,0],
+                showline: true,
                 zeroline: false,
                 linecolor: '#636363',
                 linewidth: 5,
                 showgrid: false,
                 gridcolor: '#bdbdbd',
-                title: 'NCVX'
+                title: 'FFX'
                 },
                 
-        yaxis :{range: [-50,],
+        yaxis :{
                 zeroline: false,
                 showline: true,
                 showgrid: false,
                 linecolor: '#636363',
                 linewidth: 5,
-                title : 'NCVY'
+                title : 'FFY'
                 },};
         var backstat = {
-        y: {{case_data['NCV_Y']['NCV_pass']}},
-        x: {{case_data['NCV_X']['NCV_pass']}},
+        y: {{case_data['FFY']['NCV_pass']}},
+        x: {{case_data['FFX']['NCV_pass']}},
         text: {{NCV_pass_names|tojson}},
-        name: 'Negative (N={{case_data['NCV_Y']['nr_pass']}})',
+        name: 'Negative (N={{case_data['FFY']['nr_pass']}})',
         hoverinfo:'none',
         mode: 'markers',
         type: 'scatter',
@@ -39,8 +40,8 @@
         {% for abn_status  in abn_status_list %} 
         var verif = {                                                                  
                 name: '{{abn}} {{abn_status}} (N={{sex_chrom_abn[abn][abn_status]['nr_cases']}})',                                                               
-                y: {{sex_chrom_abn[abn][abn_status]['NCV_Y']}},                                        
-                x: {{sex_chrom_abn[abn][abn_status]['NCV_X']}},
+                y: {{sex_chrom_abn[abn][abn_status]['FFY']}},                                        
+                x: {{sex_chrom_abn[abn][abn_status]['FFX']}},
                 text: {{sex_chrom_abn[abn][abn_status]['s_name']|tojson}},                                       
             mode: 'markers',
             marker: {   line: {width:{{abn_line}}},
@@ -53,28 +54,14 @@
         var i = i +1
         {% endfor %}
         {% endfor %}
-    
-        {% for line  in sex_tresholds %} 
-            var line = {
-                x : {{sex_tresholds[line]['x']}},
-                y : {{sex_tresholds[line]['y']}},
-                mode: 'lines',
-                showlegend: false,
-                text: "{{sex_tresholds[line]['text']}}",
-                line: {
-                    dash: 'dot',
-                    color : 'red',
-                    width : 2},
-                name: "{{line}}"};
-        data.push(line);
-        {% endfor %}
+
         {% for sample in sample_list %}
         var NCVXYsamps = {
-        y: [{{case_data['NCV_Y']['samples'][sample]['NCV_val']}}],
-        x: [{{case_data['NCV_X']['samples'][sample]['NCV_val']}}],
-        name: {{case_data['NCV_X']['samples'][sample]['X_labels']|tojson}},
+        y: [{{case_data['FFY']['samples'][sample]['NCV_val']}}],
+        x: [{{case_data['FFX']['samples'][sample]['NCV_val']}}],
+        name: {{case_data['FFX']['samples'][sample]['X_labels']|tojson}},
         mode: 'markers',
-        text: {{case_data['NCV_X']['samples'][sample]['X_labels']|tojson}},
+        text: {{case_data['FFX']['samples'][sample]['X_labels']|tojson}},
         type: 'scatter',
         marker: {
                 color: '{{many_colors[sample]}}',
@@ -83,23 +70,6 @@
         data.push(NCVXYsamps);
         {% endfor %}
     
-        var trace = {
-        x: [-15, 0, 8, -20, -8, 0],
-        y: [-50, -50, -50, 300, 300, 300],
-        mode: 'text',
-        name: 'NCV Clasifications',
-        text: ['<b>X0</b>', '<b>XX</b>', '<b>XXX</b>','<b>XY</b>','<b>XYY</b>','<b>XXY</b>'],
-        hoverinfo:'none',
-        opacity : 0.7,
-        textposition: 'top',
-        showlegend: false,
-        textfont: {
-        size: 18,
-        },
-        type: 'scatter'
-        };
-    
-        data.push(trace);
         Plotly.newPlot('NCVXY', data, layout);
     </script>
 {% endblock %}

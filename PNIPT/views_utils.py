@@ -103,7 +103,7 @@ class BatchDataFilter():
         control_normal_Y = []
         control_normal_XY_names = []
         for s in control_normal:
-            control_normal_X.append(float(s.NCV_X))
+            control_normal_X.append(float(s.FFX))
             control_normal_Y.append(float(s.FFY))
             control_normal_XY_names.append(s.sample_name)
 
@@ -115,12 +115,12 @@ class BatchDataFilter():
                 NCV.NCV_13!='',
                 NCV.NCV_18!='',
                 NCV.NCV_21!='',
-                NCV.NCV_X!='',
+                NCV.FFX!='',
                 NCV.FFY!='',
                 NCV.NCV_13!='NA',
                 NCV.NCV_18!='NA',
                 NCV.NCV_21!='NA',
-                NCV.NCV_X!='NA',
+                NCV.FFX!='NA',
                 NCV.FFY!='NA')
 
 class DataClasifyer():
@@ -145,37 +145,6 @@ class DataClasifyer():
                                 'hard_max': {'NCV': 4 , 'color': 'red', 'text' : 'Threshold = 4'},
                                 'hard_min': {'NCV': -5, 'color': 'red', 'text' : 'Threshold = -5'} }
 
-    def make_sex_tresholds(self, x_list):
-        x_min =  min(x_list) - 1
-        if x_min > -40: 
-            x_min = -40 
-        x_max_upper = 5.05
-        x_max_lower = -5.13
-        y_min_upper = -15.409 * x_min + 91.417
-        y_max_upper = -15.409 * x_max_upper + 91.417
-        y_min_lower = -15.256 * x_min - 62.309
-        y_max_lower = -15.256 * x_max_lower - 62.309
-        self.sex_tresholds = {'XY_horis' :  {'x' : [x_min, 10],         
-                                             'y' : [self.ncvy, self.ncvy],
-                                            'text' : 'Y='+str(self.ncvy)},
-                                'XY_upper': {'x' : [x_min, x_max_upper],
-                                             'y' : [y_min_upper, y_max_upper],
-                                            'text' : 'Y = -15.3X+91.4'},
-                                'XY_lower': {'x' : [x_min, x_max_lower],
-                                             'y' : [y_min_lower, y_max_lower],
-                                            'text' : 'Y = -15.3X-62.3'},
-                                'XXY' :     {'x' : [-4, -4],    
-                                             'y' : [155, y_min_upper],
-                                            'text' : 'X=-4'},
-                                'X0' :      {'x' : [-4, -4],   
-                                             'y' : [self.ncvy, -60],
-                                             'text' : 'X=-4'},
-                                'XXX' :     {'x' : [4, 4],      
-                                             'y' : [self.ncvy, -60],
-                                             'text' : 'X=4'}}
-        for key, val in self.sex_tresholds.items():
-            val['text_position'] = [np.mean(val['x']), np.mean(val['y'])]
-            self.sex_tresholds[key] = val
 
     def get_manually_classified(self, sample_db):
         """Get the manually defined sample status"""
@@ -202,7 +171,7 @@ class DataClasifyer():
             SC = SampleClassifyer(s, self.tris_thresholds)
             SC._get_FF_warning()
             SC._get_tris_warn()
-            SC._get_sex_warn()
+            SC._get_FF()
             self.NCV_classified[s_id] = ', '.join(SC.NCV_classified)
             self.NCV_data[s_id] = SC.NCV_data
             self.NCV_sex[s_id] = SC.NCV_sex
@@ -249,46 +218,6 @@ class SampleClassifyer():
             else:
                 self.NCV_data['FF_Formatted']['warn'] = "default"
 
-    def _get_sex_warn(self):
-        """Get automated sex warnings, based on preset NCV thresholds"""
-        sex_warn = ''
-        if not set([self.sample.NCV_X , self.sample.FFY]).issubset(self.exceptions):
-            x = float(self.sample.NCV_X)
-            y = float(self.sample.FFY)
-            f_h = -15.409 * x + 91.417 - y
-            f_l = -15.256 * x - 62.309 - y
-            if 0 >= f_h and x <=- 4:
-                sex_warn = 'XYY'
-            elif 0 >= f_h and x >=- 4 and y > self.ncvy:
-                sex_warn = 'XXY'
-            elif y < self.ncvy and x >= 4:
-                sex_warn = 'XXX'
-            elif f_l < 0 <= f_h and y > self.ncvy:
-                sex_warn = 'XY'
-            elif f_l > 0 and x < -4:
-                sex_warn = 'X0'
-            elif -4 <= x <= 4 and y < self.ncvy:
-                sex_warn = 'XX'
-            
-            if sex_warn in ['XX','XY']:
-                self.NCV_data['FFY']['warn'] = "default"
-                self.NCV_data['NCV_X']['warn'] = "default"
-                sex = sex_warn
-            elif sex_warn:
-                self.NCV_data['FFY']['warn'] = "danger"
-                self.NCV_data['NCV_X']['warn'] = "danger"
-                self.NCV_classified.append(sex_warn)
-                sex = 'ambiguous'
-            else:
-                self.NCV_data['FFY']['warn'] = "default"
-                self.NCV_data['NCV_X']['warn'] = "default"
-                sex = 'ambiguous'
-            self.NCV_sex = sex
-            if 20<=y<50:
-                self.NCV_classified.append(' Compare NCVY with ff!')
-                self.NCV_data['FFY']['warn'] = "danger"        
-  
-
 
     def _get_tris_warn(self):
         """Get automated trisomi warnings, based on preset NCV thresholds"""
@@ -316,6 +245,13 @@ class SampleClassifyer():
                     else:
                         warn = "default"
             self.NCV_data['NCV_'+key] = {'val': val, 'warn': warn }
+
+    def _get_FF(self):
+        """Get automated trisomi warnings, based on preset NCV thresholds"""
+        for key in ['FFX', 'FFY']:
+            val = self.sample.__dict__[key]
+            warn = "default"
+            self.NCV_data[key] = {'val': val, 'warn': warn }
 
 ###########################################PLOTS#####################################################
 class Layout():
@@ -369,7 +305,7 @@ class SexAbnormality():
     def __init__(self, batch_id, cases):
         self.batch_id = batch_id
         self.cases = cases
-        self.case_data = {'NCV_X':{}, 'FFY' : {}}
+        self.case_data = {'FFX':{}, 'FFY' : {}}
         self.abn_status_X = {'Probable':0,'Verified':0.1,'False Positive':0.2,'False Negative':0.3, 'Suspected':0.4, 'Other': 0.5}
         self.sex_chrom_abn = {'X0':{}, 'XXX':{}, 'XXY':{},'XYY':{}}
         self.sample_list = []
@@ -403,12 +339,14 @@ class SexAbnormality():
         """Preparing sex abnormality control samples"""
         for abn in self.sex_chrom_abn.keys():
             for status in self.abn_status_X.keys():
-                self.sex_chrom_abn[abn][status] = {'NCV_X' : [], 'FFY' : [], 's_name' : [], 'nr_cases':0}
+                self.sex_chrom_abn[abn][status] = {'FFX' : [], 'FFY' : [], 's_name' : [], 'nr_cases':0}
                 cases = Sample.query.filter(Sample.__dict__['status_'+abn] == status)
                 for s in cases:
                     NCV_db = NCV.query.filter_by(sample_ID = s.sample_ID).first()
-                    if NCV_db.include and (NCV_db.NCV_X!='NA') and NCV_db.FFY!='NA':
-                        self.sex_chrom_abn[abn][status]['NCV_X'].append(float(NCV_db.NCV_X))
+                    print(s.sample_ID)
+                    print(NCV_db.FFY)
+                    if NCV_db.include and (NCV_db.FFX!='NA') and NCV_db.FFY!='NA':
+                        self.sex_chrom_abn[abn][status]['FFX'].append(float(NCV_db.FFX))
                         self.sex_chrom_abn[abn][status]['FFY'].append(float(NCV_db.FFY))
                         self.sex_chrom_abn[abn][status]['s_name'].append(s.sample_name)
                         self.sex_chrom_abn[abn][status]['nr_cases']+=1
@@ -483,12 +421,12 @@ class TrisAbnormality():
 class FetalFraction():
     """Class to prepare Fetal Fraction Plot"""
     def __init__(self,batch_id):
-        self.dbNCV = NCV.query.filter(NCV.batch_id == batch_id, NCV.FFY!='NA',NCV.NCV_X!='NA', NCV.FFY!='',NCV.NCV_X!='').all()
+        self.dbNCV = NCV.query.filter(NCV.batch_id == batch_id, NCV.FFY!='NA',NCV.FFX!='NA', NCV.FFY!='',NCV.FFX!='').all()
         self.dbSample = Sample.query.filter(Sample.batch_id == batch_id, Sample.FF_Formatted!='NA', Sample.FF_Formatted!='').all()
         self.samples = {}
         self.sample_list = []
-        self.control = {'NCV_X':[],'FFY':[],'FF':[]}
-        self.perdiction = {'NCV_X':{},'FFY':{}}
+        self.control = {'FFX':[],'FFY':[],'FF':[]}
+        self.perdiction = {'FFX':{},'FFY':{}}
         self.nr_contol_samples = None
 
     def form_prediction_interval(self):
@@ -503,18 +441,19 @@ class FetalFraction():
         self.perdiction['FFY']['FFY_min'] = {'x':[20, 20],'y':[0, 35]}
 
         #y=-0.8074x + 7.861
-        self.perdiction['NCV_X']['min'] = {'x':[-30,5],'y':[32.083,3.824]}
+        self.perdiction['FFX']['min'] = {'x':[-30,5],'y':[32.083,3.824]}
 
         #y=-0.8062x - 3.2337
-        self.perdiction['NCV_X']['max'] = {'x':[-30,5],'y':[20.9523,-7.2647]}
+        self.perdiction['FFX']['max'] = {'x':[-30,5],'y':[20.9523,-7.2647]}
 
-        self.perdiction['NCV_X']['ff_min'] = {'x':[-30,5],'y':[2, 2]}
+        self.perdiction['FFX']['ff_min'] = {'x':[-30,5],'y':[2, 2]}
 
     def format_case_dict(self):
         for samp in self.dbSample:
             try:
                 self.samples[samp.sample_ID] = {}
-                self.samples[samp.sample_ID]['FF'] = int(samp.FF_Formatted.rstrip('%').lstrip('<'))
+                self.samples[samp.sample_ID]['FF'] = float(samp.FF_Formatted.rstrip('%').lstrip('<'))
+                print(samp.FF_Formatted.rstrip('%').lstrip('<'))
             except:
                 pass
         for samp in self.dbNCV:
@@ -522,8 +461,8 @@ class FetalFraction():
                self.samples[samp.sample_ID] = {} 
             try:
                 self.samples[samp.sample_ID]['name'] = samp.sample_name
-                self.samples[samp.sample_ID]['NCVY'] = float(samp.FFY)
-                self.samples[samp.sample_ID]['NCVX'] = float(samp.NCV_X)
+                self.samples[samp.sample_ID]['FFY'] = float(samp.FFY)
+                self.samples[samp.sample_ID]['FFX'] = float(samp.FFX)
             except:
                 pass
         self.sample_list = self.samples.keys()
@@ -537,8 +476,8 @@ class FetalFraction():
                                         Sample.status_XXX == "Normal",
                                         Sample.status_XXY == "Normal",
                                         Sample.status_XYY == "Normal")
-        FF_normal=FF_normal.join(NCV).filter(NCV.NCV_X!='NA', NCV.FFY!='NA',NCV.include==True).all()
-        NCV_normal = NCV.query.filter(NCV.NCV_X != 'NA',  NCV.NCV_X !='', NCV.FFY != 'NA', NCV.FFY != '' , NCV.include==True)
+        FF_normal=FF_normal.join(NCV).filter(NCV.FFX!='NA', NCV.FFY!='NA',NCV.include==True).all()
+        NCV_normal = NCV.query.filter(NCV.FFX != 'NA',  NCV.FFX !='', NCV.FFY != 'NA', NCV.FFY != '' , NCV.include==True)
         NCV_normal=NCV_normal.join(Sample).filter(Sample.FF_Formatted!='NA',
                                         Sample.status_X0 == "Normal",
                                         Sample.status_XXX == "Normal",
@@ -549,7 +488,7 @@ class FetalFraction():
             self.control['FF'].append(int(sample.FF_Formatted.rstrip('%').lstrip('<')))
 
         for sample in NCV_normal:
-            self.control['NCV_X'].append(float(sample.NCV_X))
+            self.control['FFX'].append(float(sample.FFX))
             self.control['FFY'].append(float(sample.FFY))
 
         self.nr_contol_samples = len(self.control['FF'])
@@ -609,9 +548,9 @@ class Statistics():
     """Class to preppare data for statistics plots"""
     def __init__(self):
         self.batches = Batch.query.all()
-        self.NonExcludedSites2Tags={}
-        self.TotalIndexedReads2Clusters = {}
-        self.Tags2IndexedReads = {}
+        self.IndexedReads={}
+        self.Bin2BinVariance = {}
+        self.DuplicationRate = {}
         self.GCBias = {}
         self.Library_nM = {}
         self.batch_ids = []
@@ -627,25 +566,20 @@ class Statistics():
         self.PCS = {}
         self.FF_Formatted = {}
         self.Clusters = {}
-        self.NonExcludedSites = {}
-        self.PerfectMatchTags2Tags = {}
         self.thresholds = {
             'GCBias': {'upper': 0.5, 'lower': -0.5}, #
-            'NonExcludedSites2Tags': {'upper':1, 'lower':0.8}, #
-            'Tags2IndexedReads': {'upper':0.9, 'lower':0.75}, # 
-            'TotalIndexedReads2Clusters': {'upper':1, 'lower':0.7},#
+            'IndexedReads': {'upper':1, 'lower':0.8}, #
+            'DuplicationRate': {'upper':0.9, 'lower':0.75}, # 
+            'Bin2BinVariance': {'upper':1, 'lower':0.7},#
             'Library_nM': {'upper':150, 'lower':10, 'wished':40},
             'Ratio_13': {'upper':0.2012977, 'lower':0.1996}, ##
             'Ratio_18': {'upper':0.2517526, 'lower':0.2495}, ##
             'Ratio_21': {'upper':0.2524342, 'lower':0.2492}, ##
-            'NCD_Y': {'lower' : 80, 'lower_nr2' : -100, 'upper': 1000}, ##
             'FF_Formatted': {'lower':2},
             'Stdev_13' : {'upper' : 0.000673, 'lower' : 0},
             'Stdev_18' : {'upper' : 0.00137, 'lower' : 0},
             'Stdev_21' : {'upper' : 0.00133, 'lower' : 0},
             'Clusters' : {'upper' : 450000000, 'lower' : 250000000},
-            'NonExcludedSites' : {'upper' : 100000000, 'lower' : 8000000},
-            'PerfectMatchTags2Tags' : {'upper' : 1, 'lower' : 0.7},
             }           
 
     def get_20_latest(self):
@@ -663,14 +597,12 @@ class Statistics():
         i=1
         for batch_id in self.batch_ids:
             self.Library_nM[batch_id]={'x':[],'y':[]}
-            self.NonExcludedSites2Tags[batch_id]={'x':[],'y':[]}
+            self.IndexedReads[batch_id]={'x':[],'y':[]}
             self.GCBias[batch_id]={'x':[],'y':[]}
-            self.Tags2IndexedReads[batch_id]={'x':[],'y':[]}
+            self.DuplicationRate[batch_id]={'x':[],'y':[]}
             self.FF_Formatted[batch_id]={'x':[],'y':[]}
-            self.TotalIndexedReads2Clusters[batch_id]={'x':[],'y':[]}
+            self.Bin2BinVariance[batch_id]={'x':[],'y':[]}
             self.Clusters[batch_id] = {'x':[], 'y':[]}
-            self.NonExcludedSites[batch_id] = {'x':[], 'y':[]}
-            self.PerfectMatchTags2Tags[batch_id] = {'x':[], 'y':[]}
             samps = Sample.query.filter(Sample.batch_id==batch_id)
             for samp in samps:
                 FF = samp.FF_Formatted.rstrip('%').lstrip('<')
@@ -687,8 +619,8 @@ class Statistics():
                     logging.exception('')
                     pass
                 try:
-                    self.NonExcludedSites2Tags[batch_id]['y'].append(float(samp.NonExcludedSites2Tags))
-                    self.NonExcludedSites2Tags[batch_id]['x'].append(i)
+                    self.IndexedReads[batch_id]['y'].append(float(samp.IndexedReads))
+                    self.IndexedReads[batch_id]['x'].append(i)
                 except:
                     logging.exception('')
                     pass
@@ -699,32 +631,20 @@ class Statistics():
                     logging.exception('')
                     pass
                 try:
-                    self.Tags2IndexedReads[batch_id]['y'].append(float(samp.Tags2IndexedReads))
-                    self.Tags2IndexedReads[batch_id]['x'].append(i)
+                    self.DuplicationRate[batch_id]['y'].append(float(samp.DuplicationRate))
+                    self.DuplicationRate[batch_id]['x'].append(i)
                 except:
                     logging.exception('')
                     pass
                 try:
-                    self.TotalIndexedReads2Clusters[batch_id]['y'].append(float(samp.TotalIndexedReads2Clusters))
-                    self.TotalIndexedReads2Clusters[batch_id]['x'].append(i)
+                    self.Bin2BinVariance[batch_id]['y'].append(float(samp.Bin2BinVariance))
+                    self.Bin2BinVariance[batch_id]['x'].append(i)
                 except:
                     logging.exception('')
                     pass
                 try:
                     self.Clusters[batch_id]['y'].append(float(samp.Clusters))
                     self.Clusters[batch_id]['x'].append(i)
-                except:
-                    logging.exception('')
-                    pass
-                try:
-                    self.NonExcludedSites[batch_id]['y'].append(float(samp.NonExcludedSites))
-                    self.NonExcludedSites[batch_id]['x'].append(i)
-                except:
-                    logging.exception('')
-                    pass
-                try:
-                    self.PerfectMatchTags2Tags[batch_id]['y'].append(float(samp.PerfectMatchTags2Tags))
-                    self.PerfectMatchTags2Tags[batch_id]['x'].append(i)
                 except:
                     logging.exception('')
                     pass
@@ -788,7 +708,6 @@ class Statistics():
             self.Ratio_13[batch_id] = {'x':[],'y':[]}
             self.Ratio_18[batch_id] = {'x':[],'y':[]}
             self.Ratio_21[batch_id] = {'x':[],'y':[]}
-            self.NCD_Y[batch_id] = {'x':[],'y':[]}
             samps = NCV.query.filter(NCV.batch_id==batch_id)
             for samp in samps:
                 try:
@@ -801,10 +720,5 @@ class Statistics():
                 except Exception as e:
                     logging.exception(e)
                     pass
-                try:
-                    self.NCD_Y[batch_id]['y'].append(float(samp.NCD_Y))
-                    self.NCD_Y[batch_id]['x'].append(i)
-                except:
-                    logging.exception('')
             i+=1
 

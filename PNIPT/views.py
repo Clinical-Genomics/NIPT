@@ -352,7 +352,6 @@ def sample_xy_plot( sample_id):
     DC = DataClasifyer(NCV_dat)
     DC.handle_NCV()
 
-    DC.make_sex_tresholds(BDF.NCV_passed_X)
     chrom_abnorm = ['T13','T18', 'T21', 'X0', 'XXX','XXY','XYY']
 
     db_entries = {c:sample.__dict__['status_'+c].replace('\r\n', '').strip() for c in chrom_abnorm }
@@ -570,14 +569,13 @@ def NCVXY_plot(batch_id):
     batch = Batch.query.filter(Batch.batch_id == batch_id).first()
     DC = DataClasifyer(NCV_db)
     DC.handle_NCV()
-    DC.make_sex_tresholds(BDF.NCV_passed_X)
     DC.get_QC_warnings(sample_db)
 
 
     # Getting and formating sample and NCV data for the control samples in the plot
     control_normal_X, control_normal_Y, control_normal_XY_names = BDF.control_NCVXY() 
     SA = SexAbnormality(batch_id, NCV_db)
-    SA.make_case_data('NCV_X', control_normal_X)
+    SA.make_case_data('FFX', control_normal_X)
     SA.make_case_data('FFY', control_normal_Y)
     SA.make_sex_chrom_abn()
     return render_template('batch_page/tab_NCVXY.html',
@@ -594,7 +592,7 @@ def NCVXY_plot(batch_id):
         abn_size        = L.abn_size,
         abn_line        = L.abn_line,
         abn_symbol      = L.abn_symbol,
-        samp_range      = range(len(SA.case_data['NCV_X']['samples'])),
+        samp_range      = range(len(SA.case_data['FFX']['samples'])),
         sex_chrom_abn   = SA.sex_chrom_abn,
         abn_status_list = ['Other','False Positive','Suspected', 'Probable', 'Verified','False Negative'],
         many_colors     = L.many_colors_dict,
@@ -712,7 +710,6 @@ def report(batch_id, coverage):
     batch = Batch.query.filter(Batch.batch_id == batch_id).first()
     DC = DataClasifyer(NCV_db)
     DC.handle_NCV()
-    DC.make_sex_tresholds(BDF.NCV_passed_X)
     DC.get_QC_warnings(sample_db)
     DC.get_manually_classified(sample_db)
 
@@ -807,8 +804,8 @@ def statistics():
     ST.make_statistics_from_database_Sample()
     ST.make_statistics_from_database_NCV()
     return render_template('statistics_page.html',
-        ticks = range(1,len(ST.NonExcludedSites2Tags)+1),
-        NonExcludedSites2Tags = ST.NonExcludedSites2Tags,
+        ticks = range(1,len(ST.IndexedReads)+1),
+        IndexedReads = ST.IndexedReads,
         GCBias = ST.GCBias,
         Ratio_13 = ST.Ratio_13,
         Ratio_18 = ST.Ratio_18,
@@ -817,15 +814,12 @@ def statistics():
         Stdev_18 = ST.Stdev_18,
         Stdev_21 = ST.Stdev_21,
         Clusters = ST.Clusters,
-        NonExcludedSites = ST.NonExcludedSites,
-        PerfectMatchTags2Tags = ST.PerfectMatchTags2Tags,
         FF_Formatted = ST.FF_Formatted,
-        NCD_Y = ST.NCD_Y,
         PCS = ST.PCS,
         thresholds = ST.thresholds,
         Library_nM = ST.Library_nM,
-        Tags2IndexedReads = ST.Tags2IndexedReads,
-        TotalIndexedReads2Clusters = ST.TotalIndexedReads2Clusters,
+        DuplicationRate = ST.DuplicationRate,
+        Bin2BinVariance = ST.Bin2BinVariance,
         batch_ids = ST.batch_ids,
         batch_names = ST.batch_names,
         dates = ST.dates)

@@ -13,22 +13,22 @@
         </li>
         <li><a href="{{url_for('NCV21_plot', batch_id = batch_id)}}">NCV21</a>
         </li>
-        <li><a href="{{url_for('NCVXY_plot', batch_id = batch_id)}}">NCVXY</a>
+        <li><a href="{{url_for('NCVXY_plot', batch_id = batch_id)}}">FFXY</a>
         </li>
         <li class="active"><a href="{{url_for('FF_plot', batch_id = batch_id)}}">FF</a>
         </li>
         <li><a href="{{url_for('covX_covY', batch_id = batch_id)}}">CovX vs CovY</a>
         </li>
-        <li><a href="{{url_for('coverage_plot', batch_id = batch_id)}}">Coverage (Chr 1-22)</a>
+        <li><a href="{{url_for('coverage_plot', batch_id = batch_id)}}">Ratio (Chr 1-22)</a>
         </li>
     </ul>
     <div class="tab-content">
         <div class="tab-pane active" id='NCV_XY'>
             <div class="panel panel-default">
                 <div class="panel-body">
-                    <div id="FFNCVY" style="min-width:400px; height:800px; ">
+                    <div id="FFY" style="min-width:400px; height:800px; ">
                     </div>
-                    <div id="FFNCVX" style="min-width:400px; height:800px; ">
+                    <div id="FFX" style="min-width:400px; height:800px; ">
                     </div>
                 </div>
             </div>
